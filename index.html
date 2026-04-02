@@ -2,45 +2,45 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NEPLAN - Diagnóstico Estratégico Fazendário</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React & ReactDOM -->
+    <!-- React & Babel -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; letter-spacing: -0.015em; }
-        .apple-blur { backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); }
-        .bento-card { transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-        .bento-card:hover { transform: translateY(-8px); box-shadow: 0 30px 60px -12px rgba(0,0,0,0.08); }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; background-color: #FBFBFD; }
+        .apple-blur { backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); }
+        .bento-card { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .bento-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.06); }
         .bg-ufv-gradient { background: linear-gradient(135deg, #004a23 0%, #1e3a29 100%); }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #004a23; border-radius: 10px; }
         
         .sobrevivencia-red { 
-            background: linear-gradient(135deg, #ef4444 0%, #7f1d1d 100%);
+            background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-weight: 900;
-            text-transform: uppercase;
-            font-style: italic;
         }
+        
         .institucional-green { color: #004a23; font-weight: 800; }
-        .main-title-giant { font-size: clamp(3rem, 10vw, 8.5rem); line-height: 0.82; letter-spacing: -0.05em; }
+        .main-title-giant { font-size: clamp(2.5rem, 8vw, 7.5rem); line-height: 0.85; letter-spacing: -0.04em; }
+
+        /* Semáforo de Notas */
+        .score-red { color: #ef4444; border-color: #ef4444; background-color: #fef2f2; border-width: 6px; }
+        .score-yellow { color: #d97706; border-color: #d97706; background-color: #fffbeb; border-width: 6px; }
+        .score-green { color: #15803d; border-color: #15803d; background-color: #f0fdf4; border-width: 6px; }
         
-        .score-semaphoro-red { color: #ef4444; border-color: #ef4444; background-color: #fef2f2; border-width: 10px; }
-        .score-semaphoro-yellow { color: #d97706; border-color: #d97706; background-color: #fffbeb; border-width: 10px; }
-        .score-semaphoro-green { color: #15803d; border-color: #15803d; background-color: #f0fdf4; border-width: 10px; }
-        
-        .photo-container { 
-            width: 120px; 
-            height: 120px; 
+        /* Container da Foto Otimizado p/ Ver Rosto Inteiro */
+        .photo-wrapper { 
+            width: clamp(80px, 12vw, 130px); 
+            height: clamp(80px, 12vw, 130px); 
             border-radius: 50%; 
             border: 4px solid #004a23; 
             overflow: hidden; 
@@ -48,22 +48,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         }
         .photo-img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            object-position: center 20%;
-            transform: scale(1.1); /* Reduzi a escala para caber o rosto todo */
+            object-fit: contain;
+            transform: scale(1.2);
+            object-position: center top;
         }
-        @media (max-width: 768px) { 
-            .main-title-giant { font-size: 3.5rem; }
-            .photo-container { width: 80px; height: 80px; }
-        }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-up { animation: slideUp 0.6s ease-out forwards; }
     </style>
 </head>
-<body class="bg-[#FBFBFD]">
+<body>
     <div id="root"></div>
 
     <script type="text/babel">
@@ -73,26 +73,26 @@
         const PHOTO_LUIZ_URL = "https://posadministracao.ufv.br/wp-content/uploads/2024/04/abrantes.jpg";
 
         const municipalitiesData = [
-            { id: 1, name: 'Araçaí', year: 1991, score: 2.1, status: 'Crítico', scores: { ctm: 2.5, itbi: 1.5, iss: 2.0, pgv: 1.5 }, justification: "Legislação fóssil de 1991. O município opera em um completo anacronismo fiscal, sem suporte para retenções eletrônicas ou serviços digitais.", consequence: "Pauperismo fiscal absoluto e risco total de anulação de lançamentos por falta de base legal contemporânea.", iss: 'Grave: Código pré-digital. Ignora serviços de tecnologia e economia de dados.', iptu: 'Crítico: Planta de 35 anos. Valores venais simbólicos que geram déficit orçamentário.', itbi: 'Ilegal: Avaliação sem critério; pauta fixa proibida pelo Tema 1113 STJ.', pgv: 'Obsoleto: Cadastro imobiliário em fichário físico de papel.', opportunities: ["Intervenção Normativa: Novo CTM 2026.", "Recadastramento Imobiliário via Geoprocessamento.", "Instituição de Malha Fiscal Eletrônica de ISS."], actionPlan: 'Reforma Estrutural Emergencial: Do Analógico ao Digital.' },
-            { id: 2, name: 'Baldim', year: 2009, score: 5.2, status: 'Alerta', scores: { ctm: 5.5, itbi: 4.0, iss: 5.0, pgv: 4.0 }, justification: "Normas de 2009 com retalhos legislativos. Ausência de referibilidade técnica nas taxas de serviços urbanos.", consequence: "Risco de repetição de indébito e baixa eficiência na cobrança da dívida ativa mobiliária.", iss: 'Confuso: Alíquotas fixas em descompasso com o faturamento real.', iptu: 'Frágil: Tabelas de 2022 sem lei de PGV técnica aprovada.', itbi: 'Vulnerável: Modelo de avaliação administrativa sem critério estatístico.', pgv: 'Lacuna: Falta zoneamento fiscal p/ áreas de expansão.', opportunities: ["Saneamento Jurídico das Taxas de Poder de Polícia.", "Adequação ITBI à jurisprudência do STJ.", "Auditoria de ISS de Serviços Tomados (Malha Fina)."], actionPlan: 'Saneamento Normativo e Blindagem do ITBI.' },
-            { id: 3, name: 'Cachoeira da Prata', year: 1991, score: 2.0, status: 'Crítico', scores: { ctm: 2.5, itbi: 1.0, iss: 2.0, pgv: 1.5 }, justification: "Paralisia tributária absoluta. Município arrecada passivamente e não gerencia seu potencial mobiliário.", consequence: "Perda imediata de autonomia financeira e subfinanciamento perpétuo no novo IBS.", iss: 'Inexistência de DTE e NFS-e estruturada no código municipal.', iptu: 'Fichários manuais. Inexistência de planta técnica ou zoneamento moderno.', itbi: 'Base tributária nula por ausência de processo de avaliação.', pgv: 'Planta inexistente. Arrecadação funciona como taxa fixa simbólica.', opportunities: ["Instituição de Sistema Fazendário Digital Completo.", "Migração de Cadastro Manual para Banco de Dados SQL.", "Novo Código Tributário Municipal Modelo NEPLAN."], actionPlan: 'Modernização Emergencial e Estruturação Fazendária.' },
-            { id: 4, name: 'Capim Branco', year: 2006, score: 7.1, status: 'Bom', scores: { ctm: 7.0, itbi: 5.5, iss: 7.5, pgv: 5.0 }, justification: "Boa visão estratégica no ISS, mas planta de valores estagnada que gera injustiça fiscal profunda.", consequence: "Injustiça social (imóveis de luxo pagando pouco) e dependência cíclica de REFIS.", iss: 'Forte em TI (2%), mas exige consolidação dos últimos decretos na lei.', iptu: 'Valores estagnados há 20 anos. Terrenos com valores irreais.', itbi: 'Necessita de fluxo digital de contraditório p/ evitar mandados de segurança.', pgv: 'Regular, mas exige revisão setorial para vetores industriais.', opportunities: ["Consolidação Legislativa e novo CTM 2026.", "Substituição de REFIS por Cobrança Inteligente.", "Atualização da PGV para os novos logradouros urbanos."], actionPlan: 'Consolidação Normativa e Inteligência Fiscal Digital.' },
-            { id: 5, name: 'Confins', year: 2020, score: 8.8, status: 'Excelente', scores: { ctm: 9.0, itbi: 7.0, iss: 8.5, pgv: 6.0 }, justification: "Referência regional legislativa (2020). Desafio: atualizar a planta venal de condomínios de alto luxo.", consequence: "Renúncia involuntária de receita patrimonial massiva em áreas nobres.", iss: 'Robusto. DTE ativo. Ponto cego: conflito em ISS de autônomos (Art. 64/69).', iptu: 'Mapa moderno. Gargalo: terrenos em condomínios sub-avaliados.', itbi: 'Alíquota de 3% para usufruto passível de contestação judicial.', pgv: 'Avançado e geoprocessado. Exige reajuste de mercado real.', opportunities: ["Auditoria especializada em ISS Aeroportuário (Item 20).", "Ajuste do ITBI ao Tema 1113 do STJ.", "Reavaliação estatística da PGV para Condomínios Nobres."], actionPlan: 'Blindagem Jurídica e Especialização Arrecadatória Setorial.' },
-            { id: 6, name: 'Jaboticatubas', year: 2005, score: 7.5, status: 'Bom', scores: { ctm: 7.5, itbi: 6.0, iss: 7.0, pgv: 5.5 }, justification: "Maturidade normatizada, mas o crescimento geográfico superou a capacidade de fiscalização imobiliária.", consequence: "Fuga de receita no setor de eventos e desordem cadastral em expansão urbana recente.", iss: 'Evasão em plataformas digitais (Airbnb) por falta de malha.', iptu: 'Inconsistência urbano-rural gera perda de base em áreas de chácaras.', itbi: 'Avaliação manual lenta e desvinculada dos preços de transação reais.', pgv: 'Novos loteamentos com tipologia construtiva não mapeada.', opportunities: ["Instituição do ISS especializado p/ Turismo e Lazer.", "Projeto de Regularização Fundiária e REURB Fiscal.", "Geoprocessamento de Áreas de Expansão Urbana."], actionPlan: 'Fomento ao Turismo e Regularização Cadastral Urbana.' },
-            { id: 7, name: 'Papagaios', year: 1997, score: 6.4, status: 'Regular', scores: { ctm: 6.0, itbi: 4.5, iss: 6.0, pgv: 4.0 }, justification: "Forte dependência mineral. Legislação da década de 90 ineficaz para tributar a extração técnica.", consequence: "Risco em taxas sanitárias e baixa captura do valor real mineral.", iss: 'Vulnerável: Falta monitoramento mineral especializado.', iptu: 'Defasado: Planta industrial de 1997. Perda brutal de valor real da base.', itbi: 'Risco: Avaliação arbitrária sem contraditório administrativo regular.', pgv: 'Zoneamento mineral defasado frente à expansão.', opportunities: ["Auditoria Setorial Mineral e Novo CTM Integrado.", "Referibilidade técnica de custos para taxas municipais.", "Atualização da PGV Industrial."], actionPlan: 'Auditoria Setorial e Novo Marco Normativo 2026.' },
-            { id: 8, name: 'Cordisburgo', year: 2017, score: 6.5, status: 'Regular', scores: { ctm: 7.0, itbi: 5.0, iss: 6.5, pgv: 4.5 }, justification: "Legislação recente mas sem braço executivo de inteligência. Planta de valores carece de metodologia estatística.", consequence: "Lançamentos de ITBI vulneráveis e baixa eficácia na cobrança da dívida ativa mobiliária.", iss: 'Regular: Segue padrão LC 157, mas fiscalização mobiliária é passiva.', iptu: 'Manual: Cadastro carece de atualização georreferenciada de áreas.', itbi: 'Risco: Uso de pauta fixa de referência sem análise.', pgv: 'Débil: Planta de valores precária e sem fundamentação estatística.', opportunities: ["Modernização da Dívida Ativa com régua de cobrança.", "Revisão estrutural estatística da Planta de Valores.", "Monitoramento eletrônico de serviços do Simples Nacional."], actionPlan: 'Inteligência de Dados e Recuperação de Ativos.' },
-            { id: 9, name: 'Maravilhas', year: 2001, score: 4.4, status: 'Crítico', scores: { ctm: 4.5, itbi: 2.0, iss: 4.0, pgv: 3.0 }, justification: "Gestão baseada em Decretos ilegais. Violação direta do Princípio da Reserva Legal.", consequence: "Nulidade total da arrecadação e exposição do gestor a processos de improbidade.", iss: 'Grave: Código ignora economia digital e domicílio eletrônico.', iptu: 'Atualização por Decreto (Decreto 362/25) é inconstitucional.', itbi: 'Fixação de valor por bairro via decreto gera lançamentos nulos.', pgv: 'Metodologia inexistente no texto legal vigente.', opportunities: ["Revogação emergencial de Decretos inconstitucionais.", "Aprovação de Novo CTM pela Câmara Municipal.", "Criação de Comissão Técnica de Avaliação."], actionPlan: 'Intervenção Normativa Urgente e Blindagem Fiscal.' },
-            { id: 10, name: 'Prudente de Morais', year: 1993, score: 2.2, status: 'Crítico', scores: { ctm: 2.5, itbi: 1.5, iss: 2.0, pgv: 1.5 }, justification: "Pauperismo fiscal derivado de 33 anos sem atualização real da base normativa e imobiliária.", consequence: "Subfinanciamento crônico e exposição total a riscos judiciais no ITBI.", iss: 'Inexistente: Perda de base massiva por lista de serviços anacrônica.', iptu: 'Grave: Planta de 1993 com defasagem superior a 1000%.', itbi: 'Nulo: Sem fluxo administrativo de avaliação ou contraditório.', pgv: 'Obsoleto: Planta não contempla 70% do crescimento urbano atual.', opportunities: ["Reforma Tributária Integral (Novo CTM e PGV).", "Implementação de Malha Fiscal e DTE Moderno.", "Recadastramento digital imobiliário urbano."], actionPlan: 'Reforma Total: Do Século XX para a Gestão IBS 2026.' },
-            { id: 11, name: 'Santana de Pirapama', year: 2014, score: 5.8, status: 'Alerta', scores: { ctm: 6.0, itbi: 4.0, iss: 5.0, pgv: 4.0 }, justification: "Conflito sistêmico entre CTM 2014 e Código de Obras de 1993, travando a tributação do crescimento.", consequence: "Evasão de ISS de obras e IPTU sobre novos sítios e áreas de lazer não mapeadas.", iss: 'Trava: Código de Obras de 1993 impede o licenciamento e o ISS.', iptu: 'Lacuna: PGV ignora áreas de expansão de sítios e chácaras.', itbi: 'Risco: Avaliação arbitrária sem critérios de zoneamento modernos.', pgv: 'Regular: Valores genéricos sem distinção de tipologia construtiva.', opportunities: ["Novo Código de Obras e Edificações.", "Projeto de Geoprocessamento Multifinalitário.", "Revisão estatística de valores para áreas de lazer."], actionPlan: 'Modernização do Desenvolvimento Urbano e Fiscal.' },
-            { id: 12, name: 'Matozinhos', year: 1978, score: 4.0, status: 'Crítico', scores: { ctm: 3.5, itbi: 3.0, iss: 4.5, pgv: 3.0 }, justification: "Caos legislativo. Código de 1978 com centenas de leis esparsas que se anulam mutuamente.", consequence: "Incapacidade absoluta de monitorar o IBS 2026 e insegurança jurídica total nos lançamentos.", iss: 'Frágil: Colcha de retalhos ilegível para o corpo fiscal.', iptu: 'Inseguro: Base legal fragmentada gera processos em massa.', itbi: 'Arcaico: Modelo de avaliação da década de 70.', pgv: 'Obsoleto: Valores venais desconectados da realidade econômica.', opportunities: ["Unificação Legislativa (CTM 2026).", "Cadastro Imobiliário Georreferenciado.", "Modernização completa do sistema fazendário."], actionPlan: 'Unificação Normativa e Geoprocessamento.' },
-            { id: 13, name: 'Caetanópolis', year: 2005, score: 6.2, status: 'Regular', scores: { ctm: 6.5, itbi: 4.5, iss: 5.5, pgv: 4.5 }, justification: "Estagnação administrativa. Legislação de 2005 sem braço tecnológico de fiscalização setorial.", consequence: "Baixa recuperação de créditos tributários e planta de valores fictícia.", iss: 'Regular: Baixa retenção de serviços tomados; malha inexistente.', iptu: 'Médio: Valores venais baseados em índices, não em mercado.', itbi: 'Vulnerável: Lançamento baseado em valor de referência defasado.', pgv: 'Regular: Necessita de atualização cartográfica setorial.', opportunities: ["Modernização do PAT e do Processo Administrativo.", "Projeto Planta de Valores 2027.", "Fiscalização eletrônica do ISS das indústrias."], actionPlan: 'Modernização Fazendária e Inteligência Fiscal.' },
-            { id: 14, name: 'Inhaúma', year: 2013, score: 6.0, status: 'Regular', scores: { ctm: 6.5, itbi: 4.5, iss: 5.0, pgv: 4.5 }, justification: "Maturidade normativa razoável, mas com déficit na fundamentação técnica de taxas municipais.", consequence: "Risco de desequilíbrio orçamentário por taxas de serviços subdimensionadas.", iss: 'Básico: Necessita de revisão para substituição tributária.', iptu: 'Médio: Base imobiliária com defasagem técnica de uma década.', itbi: 'Alerta: Avaliação sem critérios técnicos de zoneamento.', pgv: 'Débil: Carece de estudo de custos para taxas de limpeza.', opportunities: ["Plano de Prontidão Institucional para o IBS 2026.", "Auditoria de custos para as Taxas de Serviços.", "Revisão do Código de Obras Municipal."], actionPlan: 'Adequação Institucional e Revisão de Custos.' }
+            { id: 1, name: 'Araçaí', year: 1991, score: 2.1, status: 'Crítico', scores: { ctm: 2.5, itbi: 1.5, iss: 2.0, pgv: 1.5 }, justification: "Legislação fóssil de 1991. O município opera em um completo anacronismo fiscal, sem suporte para retenções eletrônicas ou geoprocessamento.", consequence: "Pauperismo fiscal absoluto e risco total de anulação de lançamentos por falta de base legal contemporânea.", iss: 'Grave: Código pré-digital. Ignora serviços de tecnologia e economia de dados.', iptu: 'Crítico: Planta de 35 anos. Valores venais simbólicos que geram déficit orçamentário.', itbi: 'Ilegal: Avaliação sem critério; pauta fixa proibida pelo Tema 1113 STJ.', pgv: 'Obsoleto: Cadastro imobiliário em fichário físico de papel.', opportunities: ["Intervenção Normativa: Novo CTM 2026.", "Recadastramento Imobiliário via Geoprocessamento.", "Instituição de Malha Fiscal Eletrônica de ISS."], actionPlan: 'Reforma Estrutural Emergencial: Do Analógico ao Digital.' },
+            { id: 2, name: 'Baldim', year: 2009, score: 5.2, status: 'Alerta', scores: { ctm: 5.5, itbi: 4.0, iss: 5.0, pgv: 4.0 }, justification: "Normas de 2009 com retalhos legislativos. Ausência de referibilidade técnica nas taxas de serviços urbanos.", consequence: "Risco sistêmico de repetição de indébito e baixa eficiência na cobrança da dívida ativa mobiliária.", iss: 'Confuso: Alíquotas fixas em descompasso com o faturamento real.', iptu: 'Frágil: Tabelas de 2022 sem lei de PGV técnica aprovada por Lei.', itbi: 'Vulnerável: Modelo de avaliação sem critério estatístico de mercado.', pgv: 'Lacuna: Falta zoneamento fiscal p/ áreas de expansão.', opportunities: ["Saneamento Jurídico das Taxas de Poder de Polícia.", "Adequação ITBI à jurisprudência do STJ.", "Auditoria de ISS de Serviços Tomados (Malha Fina)."], actionPlan: 'Saneamento Normativo e Blindagem do ITBI.' },
+            { id: 3, name: 'Cachoeira da Prata', year: 1991, score: 2.0, status: 'Crítico', scores: { ctm: 2.5, itbi: 1.0, iss: 2.0, pgv: 1.5 }, justification: "Paralisia tributária absoluta. Município arrecada passivamente e não gerencia seu potencial mobiliário.", consequence: "Perda imediata de autonomia financeira e subfinanciamento perpétuo no novo IBS.", iss: 'Inexistência de DTE e NFS-e estruturada no código municipal.', iptu: 'Fichários manuais. Inexistência de planta técnica.', itbi: 'Base tributária nula por ausência de processo de avaliação.', pgv: 'Planta inexistente. Arrecadação meramente simbólica.', opportunities: ["Instituição de Sistema Fazendário Digital Completo.", "Migração de Cadastro Manual para Banco de Dados SQL.", "Novo Código Tributário Municipal Modelo NEPLAN."], actionPlan: 'Modernização Emergencial e Estruturação Fazendária.' },
+            { id: 4, name: 'Capim Branco', year: 2006, score: 7.1, status: 'Bom', scores: { ctm: 7.0, itbi: 5.5, iss: 7.5, pgv: 5.0 }, justification: "Boa visão estratégica no ISS, mas planta de valores estagnada que gera injustiça fiscal profunda.", consequence: "Injustiça social (imóveis de luxo pagando pouco) e dependência cíclica de REFIS.", iss: 'Forte em TI (2%), mas exige consolidação dos decretos na lei.', iptu: 'Valores estagnados há 20 anos. Terrenos com valores irreais.', itbi: 'Necessita de fluxo digital de contraditório administrativo.', pgv: 'Regular, mas exige revisão setorial para vetores industriais.', opportunities: ["Consolidação Legislativa e novo CTM 2026.", "Substituição de REFIS por Cobrança Inteligente.", "Atualização da PGV para os novos logradouros urbanos."], actionPlan: 'Consolidação Normativa e Inteligência Fiscal.' },
+            { id: 5, name: 'Confins', year: 2020, score: 8.8, status: 'Excelente', scores: { ctm: 9.0, itbi: 7.0, iss: 8.5, pgv: 6.0 }, justification: "Referência regional legislativa (2020). Desafio: atualizar a planta venal de condomínios de alto luxo.", consequence: "Renúncia involuntária de receita patrimonial massiva em áreas nobres.", iss: 'Robusto. DTE ativo. Conflito em ISS de autônomos (Art. 64/69).', iptu: 'Mapa moderno. Gargalo: terrenos em condomínios sub-avaliados.', itbi: 'Alíquota de 3% para usufruto passível de contestação judicial.', pgv: 'Avançado e geoprocessado. Exige reajuste de mercado real.', opportunities: ["Auditoria especializada em ISS Aeroportuário (Item 20).", "Ajuste do ITBI ao Tema 1113 do STJ.", "Reavaliação estatística da PGV para Condomínios Nobres."], actionPlan: 'Blindagem Jurídica e Especialização Arrecadatória Setorial.' },
+            { id: 6, name: 'Jaboticatubas', year: 2005, score: 7.5, status: 'Bom', scores: { ctm: 7.5, itbi: 6.0, iss: 7.0, pgv: 5.5 }, justification: "Maturidade normatizada, mas o crescimento geográfico superou a capacidade de fiscalização imobiliária.", consequence: "Fuga de receita no setor de eventos e desordem cadastral em expansão urbana recente.", iss: 'Evasão em plataformas digitais (Airbnb) por falta de malha.', iptu: 'Inconsistência urbano-rural gera perda de base em chácaras.', itbi: 'Avaliação manual lenta e desvinculada dos preços de transação reais.', pgv: 'Novos loteamentos com tipologia construtiva não mapeada.', opportunities: ["Instituição do ISS especializado p/ Turismo e Lazer.", "Projeto de Regularização Fundiária e REURB Fiscal.", "Geoprocessamento de Áreas de Expansão Urbana."], actionPlan: 'Fomento ao Turismo e Regularização Cadastral Urbana.' },
+            { id: 7, name: 'Papagaios', year: 1997, score: 6.4, status: 'Regular', scores: { ctm: 6.0, itbi: 4.5, iss: 6.0, pgv: 4.0 }, justification: "Forte dependência mineral. Legislação da década de 90 ineficaz para o setor extrativista moderno.", consequence: "Risco em taxas sanitárias e baixa captura do valor real mineral.", iss: 'Vulnerável: Falta monitoramento mineral especializado.', iptu: 'Defasado: Planta industrial de 1997. Perda brutal de valor real.', itbi: 'Risco: Avaliação arbitrária sem contraditório regular.', pgv: 'Zoneamento mineral defasado frente à expansão.', opportunities: ["Auditoria Setorial Mineral e Novo CTM Integrado.", "Referibilidade técnica de custos para taxas municipais.", "Atualização da PGV Industrial."], actionPlan: 'Auditoria Setorial e Novo Marco Normativo 2026.' },
+            { id: 8, name: 'Cordisburgo', year: 2017, score: 6.5, status: 'Regular', scores: { ctm: 7.0, itbi: 5.0, iss: 6.5, pgv: 4.5 }, justification: "Legislação recente sem inteligência fiscal ou malha de serviços estruturada.", consequence: "ITBI vulnerável e baixa eficácia na cobrança da dívida ativa mobiliária.", iss: 'Regular. Fiscalização de campo passiva.', iptu: 'Manual: Cadastro carece de atualização georreferenciada.', itbi: 'Uso de pauta fixa de referência sem análise individual.', pgv: 'Débil: Planta de valores precária e sem fundamentação estatística.', opportunities: ["Modernização da Dívida Ativa com régua de cobrança.", "Revisão estatística da Planta de Valores.", "Monitoramento eletrônico de serviços do Simples Nacional."], actionPlan: 'Inteligência de Dados e Recuperação de Ativos.' },
+            { id: 9, name: 'Maravilhas', year: 2001, score: 4.4, status: 'Crítico', scores: { ctm: 4.5, itbi: 2.0, iss: 4.0, pgv: 3.0 }, justification: "Gestão baseada em Decretos ilegais. Violação direta do Princípio da Reserva Legal.", consequence: "Nulidade total da arrecadação e exposição do gestor a processos de improbidade.", iss: 'Grave: Código ignora economia digital e DTE.', iptu: 'Atualização por Decreto viola o Art. 150 CF (Inconstitucional).', itbi: 'Fixação de valor por bairro via decreto gera lançamentos nulos.', pgv: 'Metodologia inexistente no texto legal. Lançamentos sem base técnica.', opportunities: ["Revogação Emergencial de Decretos Inconstitucionais.", "Aprovação de Novo CTM pela Câmara Municipal.", "Criação de Comissão Técnica de Avaliação Imobiliária."], actionPlan: 'Intervenção Normativa Urgente e Blindagem Fiscal.' },
+            { id: 10, name: 'Prudente de Morais', year: 1993, score: 2.2, status: 'Crítico', scores: { ctm: 2.5, itbi: 1.5, iss: 2.0, pgv: 1.5 }, justification: "Pauperismo fiscal derivado de 33 anos sem atualização real da base normativa e imobiliária.", consequence: "Subfinanciamento crônico e exposição total a riscos judiciais no ITBI.", iss: 'Inexistente: Perda de base massiva por lista anacrônica.', iptu: 'Grave: Planta de 1993 com defasagem superior a 1000%.', itbi: 'Nulo: Sem fluxo administrativo de avaliação ou contraditório.', pgv: 'Obsoleto: Planta não contempla 70% do crescimento urbano atual.', opportunities: ["Reforma Tributária Integral (Novo CTM e PGV).", "Implementação de Malha Fiscal e DTE Moderno.", "Recadastramento digital imobiliário urbano."], actionPlan: 'Reforma Total: Do Século XX para a Gestão IBS 2026.' },
+            { id: 11, name: 'Santana de Pirapama', year: 2014, score: 5.8, status: 'Alerta', scores: { ctm: 6.0, itbi: 4.0, iss: 5.0, pgv: 4.0 }, justification: "Conflito entre CTM 2014 e Código de Obras de 1993, travando a tributação do crescimento.", consequence: "Evasão de ISS de obras e IPTU sobre novos logradouros de lazer não mapeados.", iss: 'Trava: Código de Obras de 1993 impede o licenciamento.', iptu: 'Lacuna: PGV ignora áreas de expansão de sítios.', itbi: 'Risco: Avaliação arbitrária sem critérios modernos.', pgv: 'Regular: Valores genéricos sem distinção de tipologia.', opportunities: ["Novo Código de Obras e Edificações.", "Projeto de Geoprocessamento Multifinalitário.", "Revisão estatística de valores para áreas de lazer."], actionPlan: 'Modernização do Desenvolvimento Urbano e Fiscal.' },
+            { id: 12, name: 'Matozinhos', year: 1978, score: 4.0, status: 'Crítico', scores: { ctm: 3.5, itbi: 3.0, iss: 4.5, pgv: 3.0 }, justification: "Caos legislativo. Código de 1978 com centenas de leis esparsas conflitantes.", consequence: "Incapacidade absoluta de monitorar o IBS 2026 com segurança normativa.", iss: 'Frágil: Colcha de retalhos ilegível para o corpo fiscal.', iptu: 'Inseguro: Base legal fragmentada gera processos em massa.', itbi: 'Arcaico: Modelo de avaliação da década de 70.', pgv: 'Obsoleto: Valores venais desconectados da realidade.', opportunities: ["Unificação Legislativa em um único Código (2026).", "Cadastro Imobiliário Georreferenciado.", "Modernização completa do sistema fazendário."], actionPlan: 'Unificação Normativa e Geoprocessamento Urbano.' },
+            { id: 13, name: 'Caetanópolis', year: 2005, score: 6.2, status: 'Regular', scores: { ctm: 6.5, itbi: 4.5, iss: 5.5, pgv: 4.5 }, justification: "Estagnação administrativa de 20 anos sem suporte tecnológico setorial.", consequence: "Baixa recuperação de créditos tributários e planta de valores fictícia.", iss: 'Regular: Baixa retenção de serviços; malha inexistente.', iptu: 'Médio: Valores venais baseados em índices, não em mercado.', itbi: 'Vulnerável: Lançamento baseado em valor defasado há 20 anos.', pgv: 'Regular: Necessita de atualização cartográfica setorial.', opportunities: ["Modernização do PAT e do Processo Administrativo.", "Projeto Planta de Valores 2027.", "Fiscalização eletrônica do ISS das indústrias."], actionPlan: 'Modernização Fazendária e Inteligência Fiscal.' },
+            { id: 14, name: 'Inhaúma', year: 2013, score: 6.0, status: 'Regular', scores: { ctm: 6.5, itbi: 4.5, iss: 5.0, pgv: 4.5 }, justification: "Maturidade normativa razoável, mas com déficit na fundamentação técnica de taxas.", consequence: "Risco de desequilíbrio orçamentário por taxas subdimensionadas.", iss: 'Básico: Necessita de revisão para substituição tributária.', iptu: 'Médio: Base imobiliária com defasagem de uma década.', itbi: 'Alerta: Avaliação sem critérios técnicos de zoneamento.', pgv: 'Débil: Carece de estudo de custos para taxas de limpeza.', opportunities: ["Plano de Prontidão Institucional para o IBS 2026.", "Auditoria de custos para as Taxas de Serviços.", "Revisão do Código de Obras Municipal."], actionPlan: 'Adequação Institucional e Revisão de Custos.' }
         ];
 
         function Icon({ name, size = 24, className = "" }) {
             useEffect(() => {
                 if (window.lucide) window.lucide.createIcons();
-            }, [name]);
+            }, [name, size]);
             return <i data-lucide={name} style={{ width: size, height: size }} className={`inline-block shrink-0 ${className}`}></i>;
         }
 
@@ -119,24 +119,24 @@
                 });
             }, [searchTerm, sortKey]);
 
-            const getScoreColorClass = (val) => {
-                if (val >= 7.5) return 'score-semaphoro-green';
-                if (val >= 5.0) return 'score-semaphoro-yellow';
-                return 'score-semaphoro-red';
+            const getScoreClass = (val) => {
+                if (val >= 7.5) return 'score-green';
+                if (val >= 5.0) return 'score-yellow';
+                return 'score-red';
             };
 
             return (
-                <div className="min-h-screen">
-                    {/* Header Minimalista */}
-                    <nav className="fixed top-0 left-0 w-full z-50 bg-white/80 apple-blur border-b border-slate-100 px-10 py-5">
-                        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-                            <div className="flex items-center gap-6">
-                                <img src={UFV_LOGO_URL} alt="UFV" className="h-10" />
-                                <div className="h-6 w-px bg-slate-200 hidden md:block"></div>
-                                <h1 className="text-sm font-black uppercase tracking-[0.4em] text-green-800 leading-none">NEPLAN</h1>
+                <div className="min-h-screen flex flex-col">
+                    {/* Header Universal Híbrido */}
+                    <nav className="fixed top-0 left-0 w-full z-50 bg-white/80 apple-blur border-b border-slate-100 px-4 md:px-10 py-4">
+                        <div className="max-w-7xl mx-auto flex justify-between items-center">
+                            <div className="flex items-center gap-4">
+                                <img src={UFV_LOGO_URL} alt="UFV" className="h-8 md:h-12" />
+                                <div className="h-6 w-px bg-slate-200 hidden sm:block"></div>
+                                <h1 className="text-xs md:text-sm font-black uppercase tracking-widest text-green-800">NEPLAN</h1>
                             </div>
 
-                            <div className="flex bg-slate-100 p-1 rounded-2xl gap-1 shadow-inner ring-1 ring-slate-200/50">
+                            <div className="hidden lg:flex bg-slate-100 p-1 rounded-2xl gap-1 shadow-inner ring-1 ring-slate-200/50">
                                 {['reforma', 'panorama', 'detalhe'].map((v) => (
                                     <button key={v} onClick={() => setView(v)} className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${view === v ? 'bg-white shadow-sm text-green-800' : 'text-slate-400 hover:text-slate-600'}`}>
                                         {v === 'reforma' ? 'Reforma Tributária' : v === 'panorama' ? 'Raio-X Regional' : 'Detalhamento Municipal'}
@@ -144,123 +144,111 @@
                                 ))}
                             </div>
 
-                            <div className="flex items-center gap-8">
+                            <div className="flex items-center gap-4">
                                 <div className="text-right">
-                                    <p className="text-sm font-medium text-slate-500 leading-none tracking-tight">Professor Dr. Luiz Antônio <span className="text-abrantes italic font-black not-italic">Abrantes</span></p>
-                                    <p className="text-[10px] font-bold text-slate-400 mt-1.5 leading-none tracking-widest lowercase">
-                                        <span className="text-[#004a23]">abrantes</span>@ufv.br
+                                    <p className="text-[10px] md:text-sm font-medium text-slate-500 leading-none">Professor Dr. Luiz Antônio <span className="text-[#004a23] font-black">Abrantes</span></p>
+                                    <p className="text-[9px] md:text-[10px] font-bold text-slate-400 mt-1 leading-none tracking-tighter lowercase">
+                                        <span className="text-[#004a23] font-bold">abrantes</span>@ufv.br
                                     </p>
                                 </div>
-                                <div className="photo-container">
-                                    <img src={PHOTO_LUIZ_URL} alt="Dr. Abrantes" className="photo-img" />
+                                <div className="photo-wrapper border-2 md:border-4">
+                                    <img src={PHOTO_LUIZ_URL} alt="Luiz" className="photo-img" />
                                 </div>
                             </div>
                         </div>
                     </nav>
 
-                    <main className="pt-48 pb-20 px-4 md:px-8 max-w-7xl mx-auto">
+                    {/* Barra de Navegação Inferior (Visível apenas em Mobile/Tablet) */}
+                    <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] z-50 bg-slate-900/90 text-white apple-blur p-2 rounded-3xl flex justify-around shadow-2xl border border-white/10">
+                        {['reforma', 'panorama', 'detalhe'].map((v) => (
+                            <button key={v} onClick={() => setView(v)} className={`flex flex-col items-center gap-1 p-2 rounded-2xl transition-all ${view === v ? 'bg-green-700 text-white' : 'text-slate-400'}`}>
+                                <Icon name={v === 'reforma' ? 'globe' : v === 'panorama' ? 'layout-dashboard' : 'target'} size={20} />
+                                <span className="text-[9px] font-black uppercase">{v === 'reforma' ? 'Reforma' : v === 'panorama' ? 'Ranking' : 'Destaque'}</span>
+                            </button>
+                        ))}
+                    </div>
+
+                    <main className="flex-1 pt-32 lg:pt-48 pb-32 px-4 md:px-8 max-w-7xl mx-auto w-full overflow-x-hidden">
                         
-                        {/* ATO 1: REFORMA TRIBUTÁRIA */}
+                        {/* VIEW 1: REFORMA (URGÊNCIA) */}
                         {view === 'reforma' && (
-                            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 space-y-24">
-                                <section className="text-center pt-8">
-                                    <p className="text-[11px] font-black uppercase tracking-[0.6em] text-slate-400 mb-10 leading-none">O Código Tributário e os Impactos da Nova Reforma</p>
-                                    <h2 className="main-title-giant tracking-tighter">
-                                        A <span className="sobrevivencia-red">sobrevivência</span> <span className="institucional-green">institucional do Município.</span>
-                                    </h2>
-                                    
-                                    <div className="max-w-4xl mx-auto mb-20 bg-white p-12 rounded-[4rem] border border-slate-100 text-left shadow-2xl">
-                                        <h3 className="text-3xl font-black mb-8 text-slate-800 flex items-center gap-4 tracking-tight">
-                                            <Icon name="globe" className="text-green-700" size={40} /> EC 132/2023: O Grande Desafio Federativo
-                                        </h3>
-                                        <p className="text-2xl text-slate-500 leading-relaxed font-medium mb-12">
-                                            A Reforma Tributária extingue o ISSQN e unifica a tributação do consumo no <strong>IBS</strong>. Esta transição retira do município o poder de induzir a economia via serviços, tornando a gestão imobiliária e a inteligência de dados as únicas garantias de <strong>autonomia financeira</strong>.
-                                        </p>
-                                        <div className="flex items-center gap-6 text-red-700 font-black text-sm uppercase tracking-widest bg-red-50 p-8 rounded-[2.5rem] border border-red-100 shadow-inner">
-                                            <Icon name="alert-circle" size={36} /> O Município que não atualizar sua base em 2026 será punido fiscalmente por décadas.
+                            <div className="animate-up space-y-12 text-center">
+                                <p className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.5em] text-slate-400 mb-4">O Código Tributário e os Impactos da Nova Reforma</p>
+                                <h2 className="main-title-giant tracking-tighter leading-none mb-12">
+                                    A <span className="sobrevivencia-red">sobrevivência</span> <span className="institucional-green">institucional do Município.</span>
+                                </h2>
+
+                                <div className="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-[3rem] border border-slate-100 text-left shadow-2xl">
+                                    <h3 className="text-2xl md:text-3xl font-black mb-6 text-slate-800 flex items-center gap-4 tracking-tight">
+                                        <Icon name="globe" className="text-green-700" size={32} /> EC 132/2023: O Novo Pacto Fiscal
+                                    </h3>
+                                    <p className="text-lg md:text-2xl text-slate-500 leading-relaxed font-medium mb-12">
+                                        A Reforma extingue o ISSQN e unifica o consumo no <strong>IBS</strong>. Esta transição retira do município o poder de legislar sobre serviços, tornando a gestão imobiliária e a inteligência de dados as únicas garantias de <strong>autonomia financeira real</strong>.
+                                    </p>
+                                    <div className="flex items-center gap-5 text-red-700 font-black text-xs uppercase tracking-widest bg-red-50 p-6 rounded-[2rem] border border-red-100 shadow-inner">
+                                        <Icon name="alert-circle" size={28} /> Inércia em 2026 resultará em subfinanciamento orçamentário por décadas.
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 text-left">
+                                    <div className="bg-slate-950 p-10 md:p-16 rounded-[4rem] text-white shadow-2xl relative overflow-hidden group">
+                                        <Icon name="flame" size={300} className="absolute -right-20 -top-20 text-red-500 opacity-20" />
+                                        <h4 className="text-3xl font-black mb-12 text-red-400">O Preço da Inércia</h4>
+                                        <div className="space-y-10 relative z-10">
+                                            {[
+                                                {i:'zap-off', t:'Subfinanciamento 50 Anos', d:'As cotas do novo IBS serão baseadas na média histórica (2024-2028). Manter leis da década de 90 hoje congela o prejuízo futuro.'},
+                                                {i:'history', t:'Fim do Incentivo ao ISS', d:'A extinção da competência local sobre o ISS retira do prefeito a indução econômica, exigindo novas fontes imobiliárias.'},
+                                                {i:'shield-alert', t:'Risco Judicial ITBI', d:'Pautas fiscais fixas geram dívidas imediatas de repetição de indébito. A inércia no modelo é um risco de insolvência jurídica.'}
+                                            ].map((item, idx) => (
+                                                <div key={idx} className="flex gap-6 group/item">
+                                                    <div className="bg-red-500/20 p-4 rounded-2xl h-fit border border-red-500/30 text-red-400 group-hover/item:scale-110 transition-transform"><Icon name={item.i} size={28} /></div>
+                                                    <div>
+                                                        <h5 className="font-black text-xl text-white mb-2 tracking-tight">{item.t}</h5>
+                                                        <p className="text-sm text-slate-400 leading-relaxed font-medium">{item.d}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 text-left">
-                                        <div className="bg-slate-950 p-12 md:p-20 rounded-[5rem] text-white shadow-2xl relative overflow-hidden group border border-white/5">
-                                            <Icon name="flame" size={350} className="absolute -right-20 -top-20 text-red-500 opacity-20 group-hover:opacity-30 transition-opacity" />
-                                            <h4 className="text-4xl font-black mb-16 text-red-400 tracking-tight">O Preço da Inércia</h4>
-                                            <div className="space-y-12 relative z-10">
-                                                <div className="flex gap-8 group/item">
-                                                    <div className="bg-red-500/20 p-6 rounded-[2.5rem] h-fit border border-red-500/30 text-red-400 shadow-lg group-hover/item:scale-110 transition-transform"><Icon name="zap-off" size={32} /></div>
-                                                    <div>
-                                                        <h5 className="font-black text-2xl text-white mb-3 tracking-tight">Subfinanciamento por 50 Anos</h5>
-                                                        <p className="text-base text-slate-400 leading-relaxed font-medium italic">"As cotas do novo IBS serão baseadas na média histórica (2024-2028). Inércia hoje congela o prejuízo por meio século."</p>
-                                                    </div>
+                                    <div className="bg-[#004a23] p-10 md:p-16 rounded-[4rem] text-white shadow-2xl relative overflow-hidden group">
+                                        <Icon name="award" size={300} className="absolute -right-20 -top-20 text-yellow-400 opacity-20" />
+                                        <h4 className="text-3xl font-black mb-12 text-yellow-400">Soluções NEPLAN</h4>
+                                        <div className="space-y-8 relative z-10">
+                                            <p className="text-2xl font-medium text-green-100 mb-8 italic opacity-90">Nossa intervenção estratégica garante a transição federativa sustentável:</p>
+                                            {[
+                                                {i:'file-text', t:'Reforma Integral de CTM'},
+                                                {i:'microscope', t:'Nova Planta de Valores 2026'},
+                                                {i:'gavel', t:'Blindagem Jurídica do ITBI'},
+                                                {i:'zap', t:'Inteligência Fazendária e DTE'}
+                                            ].map((sol, idx) => (
+                                                <div key={idx} className="flex gap-6 items-center p-6 bg-white/10 rounded-[2.5rem] border border-white/10 hover:bg-white/20 transition-all cursor-default text-left">
+                                                    <Icon name={sol.i} className="text-yellow-400" size={36} />
+                                                    <span className="font-black text-2xl tracking-tight">{sol.t}</span>
                                                 </div>
-                                                <div className="flex gap-8 group/item">
-                                                    <div className="bg-red-500/20 p-6 rounded-[2.5rem] h-fit border border-red-500/30 text-red-400 shadow-lg group-hover/item:scale-110 transition-transform"><Icon name="history" size={32} /></div>
-                                                    <div>
-                                                        <h5 className="font-black text-2xl text-white mb-3 tracking-tight">Perda do Protagonismo do ISS</h5>
-                                                        <p className="text-base text-slate-400 leading-relaxed font-medium italic">"A extinção da competência local sobre o ISS retira do prefeito a principal ferramenta de incentivo, exigindo novas fontes de receita."</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex gap-8 group/item">
-                                                    <div className="bg-red-500/20 p-6 rounded-[2.5rem] h-fit border border-red-500/30 text-red-400 shadow-lg group-hover/item:scale-110 transition-transform"><Icon name="shield-alert" size={32} /></div>
-                                                    <div>
-                                                        <h5 className="font-black text-2xl text-white mb-3 tracking-tight">Risco Sistêmico no ITBI</h5>
-                                                        <p className="text-base text-slate-400 leading-relaxed font-medium italic">"Pautas fiscais fixas geram dívidas imediatas de repetição de indébito. A inércia no modelo declaratório é um risco jurídico real."</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-[#004a23] p-12 md:p-20 rounded-[5rem] text-white shadow-2xl relative overflow-hidden group border border-white/5">
-                                            <Icon name="award" size={350} className="absolute -right-20 -top-20 text-yellow-400 opacity-20 group-hover:opacity-30 transition-opacity" />
-                                            <h4 className="text-4xl font-black mb-16 text-yellow-400 tracking-tight flex items-center gap-5">Soluções NEPLAN</h4>
-                                            <div className="space-y-12 relative z-10 text-left">
-                                                <p className="text-2xl font-medium text-green-100 mb-8 italic opacity-90">Nossa intervenção estratégica garante a transição sustentável:</p>
-                                                <div className="flex gap-8 items-center p-8 bg-white/10 rounded-[3rem] border border-white/10 hover:bg-white/20 transition-all cursor-default group/sol">
-                                                    <Icon name="file-text" className="text-yellow-400 group-hover/sol:scale-110 transition-transform" size={44} />
-                                                    <span className="font-black text-2xl">Reforma Integral de Códigos (CTM)</span>
-                                                </div>
-                                                <div className="flex gap-8 items-center p-8 bg-white/10 rounded-[3rem] border border-white/10 hover:bg-white/20 transition-all cursor-default group/sol">
-                                                    <Icon name="microscope" className="text-yellow-400 group-hover/sol:scale-110 transition-transform" size={44} />
-                                                    <span className="font-black text-2xl">Nova Planta de Valores (PGV 2026)</span>
-                                                </div>
-                                                <div className="flex gap-8 items-center p-8 bg-white/10 rounded-[3rem] border border-white/10 hover:bg-white/20 transition-all cursor-default group/sol">
-                                                    <Icon name="gavel" className="text-yellow-400 group-hover/sol:scale-110 transition-transform" size={44} />
-                                                    <span className="font-black text-2xl">Blindagem Jurídica do ITBI (STJ)</span>
-                                                </div>
-                                                <div className="flex gap-8 items-center p-8 bg-white/10 rounded-[3rem] border border-white/10 hover:bg-white/20 transition-all cursor-default group/sol">
-                                                    <Icon name="zap" className="text-yellow-400 group-hover/sol:scale-110 transition-transform" size={44} />
-                                                    <span className="font-black text-2xl">Inteligência Fazendária e DTE</span>
-                                                </div>
-                                            </div>
+                                            ))}
                                         </div>
                                     </div>
-                                </section>
+                                </div>
                             </div>
                         )}
 
-                        {/* ATO 2: PANORAMA REGIONAL */}
+                        {/* VIEW 2: PANORAMA REGIONAL */}
                         {view === 'panorama' && (
-                            <div className="animate-in slide-in-from-right-8 duration-700 space-y-12">
-                                <div className="bg-white p-12 rounded-[4rem] shadow-sm border border-slate-100">
-                                    <div className="flex flex-col lg:flex-row justify-between items-end mb-20 gap-10 text-left">
+                            <div className="animate-up space-y-10">
+                                <div className="bg-white p-8 md:p-12 rounded-[3rem] shadow-sm border border-slate-100">
+                                    <div className="flex flex-col lg:flex-row justify-between items-end mb-16 gap-10 text-left">
                                         <div className="max-w-2xl">
-                                            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-600 mb-4 inline-block">Ranking Comparativo de Maturidade Normativa</span>
-                                            <h3 className="text-5xl font-black text-slate-900 tracking-tighter leading-none uppercase">Raio-X Regional (14)</h3>
-                                            <p className="text-slate-500 font-medium mt-8 text-xl leading-relaxed italic">
-                                                Ranking fundamentado na conformidade das leis locais com as normas gerais e a jurisprudência superior (Ranking Decrescente: Melhor para o Pior).
+                                            <span className="text-[10px] font-black uppercase tracking-[0.5em] text-blue-600 mb-4 inline-block tracking-widest">Raio-X de Maturidade Normativa (14)</span>
+                                            <h3 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter leading-none uppercase">Panorama Regional</h3>
+                                            <p className="text-slate-500 font-medium mt-6 text-lg italic">
+                                                Ranking ponderado por integridade normativa, segurança de ITBI, eficácia ISS e Planta de Valores. (Ordenação: Melhor para o Pior).
                                             </p>
                                         </div>
-                                        <div className="flex flex-col gap-5 items-end">
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Ordenar Ranking por:</p>
-                                            <div className="flex bg-slate-100 p-2 rounded-[2rem] gap-1 shadow-inner ring-1 ring-slate-200/50">
-                                                {[
-                                                    {k:'score',l:'Geral'}, 
-                                                    {k:'iss',l:'ISS'}, 
-                                                    {k:'pgv',l:'PGV'}, 
-                                                    {k:'itbi',l:'ITBI'},
-                                                    {k:'ctm',l:'Integridade'}
-                                                ].map(btn => (
-                                                    <button key={btn.k} onClick={() => setSortKey(btn.k)} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${sortKey === btn.k ? 'bg-white shadow-sm text-green-800' : 'text-slate-400 hover:text-slate-600'}`}>
+                                        <div className="w-full lg:w-auto overflow-x-auto pb-2 custom-scrollbar">
+                                            <div className="flex bg-slate-100 p-2 rounded-[2rem] gap-1 shadow-inner min-w-max border border-slate-200">
+                                                {[{k:'score',l:'Geral'}, {k:'iss',l:'ISS'}, {k:'pgv',l:'PGV'}, {k:'itbi',l:'ITBI'}, {k:'ctm',l:'Integridade'}].map(btn => (
+                                                    <button key={btn.k} onClick={() => setSortKey(btn.k)} className={`px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${sortKey === btn.k ? 'bg-white shadow-sm text-green-800' : 'text-slate-400 hover:text-slate-600'}`}>
                                                         {btn.l}
                                                     </button>
                                                 ))}
@@ -270,27 +258,25 @@
 
                                     <div className="space-y-4">
                                         {filteredAndSortedMun.map((m, idx) => (
-                                            <button key={m.id} onClick={() => { setSelectedMun(m); setView('detalhe'); }} className="w-full text-left p-8 rounded-[3rem] border border-slate-50 bento-card flex items-center gap-10 group bg-slate-50/20">
-                                                <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center font-black text-xl shadow-inner ${m.score > 7 ? 'bg-green-100 text-green-700' : m.score > 5 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-600'}`}>#{idx + 1}</div>
-                                                <div className="flex-1 text-left">
+                                            <button key={m.id} onClick={() => { setSelectedMun(m); setView('detalhe'); }} className="w-full text-left p-6 md:p-10 rounded-[3rem] border border-slate-50 bento-card flex items-center gap-6 md:gap-12 group bg-slate-50/30">
+                                                <div className={`w-14 h-14 md:w-20 md:h-20 rounded-[1.5rem] flex items-center justify-center font-black text-xl shadow-inner shrink-0 ${m.score > 7 ? 'bg-green-100 text-green-700' : m.score > 5 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-600'}`}>#{idx + 1}</div>
+                                                <div className="flex-1 text-left truncate">
                                                     <div className="flex items-center gap-5">
-                                                        <h4 className="text-3xl font-black text-slate-800 group-hover:text-green-800 transition-colors leading-none tracking-tight">{m.name}</h4>
-                                                        <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase border-2 ${m.score > 7.5 ? 'bg-green-50 border-green-200 text-green-700' : m.score > 5 ? 'bg-yellow-50 border-yellow-200 text-yellow-700' : 'bg-red-50 border-red-200 text-red-600'}`}>
-                                                            {m.status}
-                                                        </div>
+                                                        <h4 className="text-xl md:text-4xl font-black text-slate-800 group-hover:text-green-800 transition-colors leading-none tracking-tight truncate">{m.name}</h4>
+                                                        <div className={`w-3 h-3 rounded-full shrink-0 ${m.score > 7.5 ? 'bg-green-500 shadow-green-200 shadow-xl' : m.score > 5 ? 'bg-yellow-500' : 'bg-red-500'}`}></div>
                                                     </div>
-                                                    <div className="flex gap-10 mt-4">
-                                                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Código de {m.year}</p>
-                                                        <div className="flex gap-6 text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
-                                                            <span className={m.scores.iss < 4 ? 'text-red-500 font-black underline' : ''}>ISS: {m.scores.iss}</span>
-                                                            <span className={m.scores.pgv < 4 ? 'text-red-500 font-black underline' : ''}>PGV: {m.scores.pgv}</span>
-                                                            <span className={m.scores.itbi < 4 ? 'text-red-500 font-black underline' : ''}>ITBI: {m.scores.itbi}</span>
+                                                    <div className="flex gap-8 mt-4">
+                                                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest leading-none">Código: {m.year}</p>
+                                                        <div className="hidden sm:flex gap-6 text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                                                            <span className={m.scores.iss < 4 ? 'text-red-500 underline' : ''}>ISS: {m.scores.iss}</span>
+                                                            <span className={m.scores.pgv < 4 ? 'text-red-500 underline' : ''}>PGV: {m.scores.pgv}</span>
+                                                            <span className={m.scores.itbi < 4 ? 'text-red-500 underline' : ''}>ITBI: {m.scores.itbi}</span>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="text-right flex items-center gap-8">
-                                                    <p className={`text-6xl font-black tracking-tighter ${m.score >= 7.5 ? 'text-green-700' : m.score >= 5 ? 'text-yellow-600' : 'text-red-600'}`}>{m.score}</p>
-                                                    <Icon name="chevron-right" className="text-slate-200 group-hover:translate-x-2 group-hover:text-green-800 transition-all" size={32} />
+                                                <div className="text-right flex items-center gap-10">
+                                                    <p className={`text-4xl md:text-7xl font-black tracking-tighter leading-none ${m.score >= 7.5 ? 'text-green-700' : m.score >= 5 ? 'text-yellow-600' : 'text-red-600'}`}>{m.score}</p>
+                                                    <Icon name="chevron-right" className="text-slate-200 group-hover:translate-x-2 transition-all" size={40} />
                                                 </div>
                                             </button>
                                         ))}
@@ -301,92 +287,84 @@
 
                         {/* ATO 3: DETALHAMENTO MUNICIPAL */}
                         {view === 'detalhe' && (
-                            <div className="animate-in fade-in slide-in-from-bottom-12 duration-700 grid grid-cols-1 lg:grid-cols-12 gap-10">
+                            <div className="animate-up flex flex-col lg:grid lg:grid-cols-12 gap-10 items-start">
                                 
-                                <aside className="lg:col-span-3 bg-white p-8 rounded-[4rem] shadow-sm border border-slate-100 h-[850px] flex flex-col sticky top-28">
-                                    <div className="px-2 mb-10 text-center text-left">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-6">Base de Dados Alfabética (14)</p>
-                                        <div className="relative">
-                                            <Icon name="search" size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                                            <input type="text" placeholder="Filtrar..." className="w-full pl-12 pr-6 py-3 bg-slate-50 rounded-2xl outline-none text-[11px] font-bold border-none focus:ring-2 focus:ring-green-700" onChange={e => setSearchTerm(e.target.value)} />
-                                        </div>
-                                    </div>
-                                    <div className="flex-1 overflow-y-auto pr-2 space-y-2 custom-scrollbar">
-                                        {sortedAlphabetical.map(m => (
-                                            <button key={m.id} onClick={() => setSelectedMun(m)} className={`w-full text-left p-5 rounded-[2.2rem] transition-all flex items-center justify-between group ${selectedMun.id === m.id ? 'bg-green-800 text-white shadow-2xl' : 'hover:bg-slate-50'}`}>
-                                                <p className={`font-black text-xs uppercase tracking-tight ${selectedMun.id === m.id ? 'text-white' : 'text-slate-700'}`}>{m.name}</p>
-                                                <Icon name="chevron-right" size={14} className={selectedMun.id === m.id ? 'text-white' : 'text-slate-300'} />
-                                            </button>
-                                        ))}
-                                    </div>
+                                <aside className="lg:col-span-3 flex lg:flex-col gap-3 overflow-x-auto pb-4 lg:pb-0 lg:h-[850px] lg:sticky lg:top-40 bg-white p-6 rounded-[3rem] border border-slate-100 shadow-sm custom-scrollbar">
+                                    <p className="hidden lg:block text-[10px] font-black text-slate-400 uppercase text-center mb-8 tracking-[0.2em]">Base Alfabética (14)</p>
+                                    {sortedAlphabetical.map(m => (
+                                        <button key={m.id} onClick={() => setSelectedMun(m)} className={`px-6 py-4 lg:p-6 rounded-[2rem] transition-all whitespace-nowrap flex items-center justify-between group shrink-0 ${selectedMun.id === m.id ? 'bg-green-800 text-white shadow-2xl' : 'bg-slate-50 text-slate-600 lg:hover:bg-slate-100'}`}>
+                                            <p className={`font-black text-[11px] lg:text-[12px] uppercase tracking-wider`}>{m.name}</p>
+                                            <Icon name="chevron-right" size={14} className={`hidden lg:block ${selectedMun.id === m.id ? 'text-white' : 'text-slate-300'}`} />
+                                        </button>
+                                    ))}
                                 </aside>
 
-                                <div className="lg:col-span-9 space-y-12">
-                                    <div className="bg-white p-12 md:p-20 rounded-[5rem] shadow-sm border border-gray-100">
+                                <div className="lg:col-span-9 space-y-12 w-full">
+                                    <div className="bg-white p-10 md:p-24 rounded-[5rem] shadow-sm border border-gray-100 overflow-hidden">
                                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-24 gap-12 text-left">
                                             <div className="max-w-2xl">
-                                                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-green-700 bg-green-50 px-6 py-2.5 rounded-2xl mb-10 inline-block font-black tracking-widest leading-none">Diagnóstico Técnico Especializado</span>
-                                                <h2 className="text-8xl font-black text-slate-900 tracking-tighter leading-none">{selectedMun.name}</h2>
-                                                <p className="text-slate-500 font-bold mt-10 text-2xl italic leading-relaxed">
+                                                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-green-700 bg-green-50 px-6 py-2.5 rounded-2xl mb-10 inline-block font-black">Diagnóstico Técnico Especializado</span>
+                                                <h2 className="text-6xl md:text-9xl font-black text-slate-900 tracking-tighter leading-none">{selectedMun.name}</h2>
+                                                <p className="text-slate-500 font-bold mt-10 text-xl md:text-3xl italic leading-tight">
                                                     Legislação operacional baseada no Código de **{selectedMun.year}**. 
-                                                    Estado de exposição institucional perante o <strong>IBS 2026</strong>.
+                                                    Estado de vulnerabilidade institucional perante o <strong>IBS 2026</strong>.
                                                 </p>
                                             </div>
-                                            <div className={`p-14 rounded-[4.5rem] text-center shadow-2xl score-circle-border ring-1 ring-slate-100 min-w-[280px] ${getScoreColorClass(selectedMun.score)}`}>
-                                                <p className="text-[11px] font-black uppercase mb-2 tracking-widest opacity-80 font-black">Nota de Maturidade</p>
-                                                <p className="text-9xl font-black leading-none">{selectedMun.score}</p>
+                                            <div className={`p-16 rounded-[4.5rem] text-center shadow-2xl ring-1 ring-slate-100 min-w-[240px] md:min-w-[320px] ${getScoreClass(selectedMun.score)}`}>
+                                                <p className="text-[12px] font-black uppercase mb-3 tracking-widest opacity-80 font-black">Nota Técnica Final</p>
+                                                <p className="text-8xl md:text-9xl font-black leading-none">{selectedMun.score}</p>
                                             </div>
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-20 text-left">
                                             <div className="p-12 rounded-[4rem] bg-slate-50 border border-slate-100 shadow-sm relative overflow-hidden flex flex-col justify-between h-full">
-                                                <Icon name="microscope" className="absolute top-0 right-0 p-8 text-green-700 opacity-10" size={140} />
-                                                <h5 className="font-black text-slate-800 uppercase text-xs tracking-widest mb-6">Justificativa da Avaliação</h5>
-                                                <p className="text-base font-medium text-slate-600 leading-relaxed">{selectedMun.justification}</p>
+                                                <Icon name="microscope" className="absolute top-0 right-0 p-10 text-green-700 opacity-10" size={160} />
+                                                <h5 className="font-black text-slate-800 uppercase text-xs tracking-widest mb-8 flex items-center gap-3"><Icon name="shield-check" className="text-green-700" size={20}/> Justificativa da Avaliação</h5>
+                                                <p className="text-lg md:text-xl font-medium text-slate-600 leading-relaxed">{selectedMun.justification}</p>
                                             </div>
                                             <div className="p-12 rounded-[4rem] bg-red-50 border border-red-100 shadow-sm relative overflow-hidden flex flex-col justify-between h-full">
-                                                <Icon name="alert-triangle" className="absolute top-0 right-0 p-8 text-red-600 opacity-10" size={140} />
-                                                <h5 className="font-black text-red-800 uppercase text-xs tracking-widest mb-6 font-black uppercase">Consequência Estratégica</h5>
-                                                <p className="text-base font-black text-red-900/70 leading-relaxed">{selectedMun.consequence}</p>
+                                                <Icon name="alert-triangle" className="absolute top-0 right-0 p-10 text-red-600 opacity-10" size={160} />
+                                                <h5 className="font-black text-red-800 uppercase text-xs tracking-widest mb-8 flex items-center gap-3"><Icon name="flame" className="text-red-600" size={20}/> Consequência Estratégica</h5>
+                                                <p className="text-lg md:text-xl font-black text-red-900/70 leading-relaxed">{selectedMun.consequence}</p>
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-24 text-left">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-24 text-left">
                                             {[
-                                                { n: 'Integridade do CTM', v: selectedMun.scores.ctm, d: 'Adequação da estrutura das Normas Gerais, Processo Administrativo (PAT) e alinhamento ao CTN.', i: 'file-spreadsheet', c: 'slate' },
+                                                { n: 'Integridade CTM', v: selectedMun.scores.ctm, d: 'Análise da estrutura normativa, Procedimento Fiscal (PAT) e plena adequação ao Código Tributário Nacional.', i: 'file-spreadsheet', c: 'slate' },
                                                 { n: 'Segurança ITBI', v: selectedMun.scores.itbi, d: selectedMun.itbi, i: 'gavel', c: 'red' },
                                                 { n: 'Eficácia ISSQN', v: selectedMun.scores.iss, d: selectedMun.iss, i: 'zap', c: 'blue' },
-                                                { n: 'Maturidade da PGV', v: selectedMun.scores.pgv, d: selectedMun.pgv, i: 'map', c: 'green' },
+                                                { n: 'Maturidade PGV', v: selectedMun.scores.pgv, d: selectedMun.pgv, i: 'map', c: 'green' },
                                             ].map((cat, i) => (
                                                 <div key={i} className="p-12 rounded-[4rem] bg-slate-50 border border-slate-50 bento-card flex flex-col justify-between h-96">
                                                     <div>
                                                         <div className="flex justify-between items-center mb-8">
-                                                            <div className={`p-5 rounded-3xl bg-white shadow-sm text-slate-600 border border-slate-100 shadow-md`}><Icon name={cat.i} size={36} /></div>
+                                                            <div className={`p-6 rounded-3xl bg-white shadow-md text-slate-600 border border-slate-100`}><Icon name={cat.i} size={40} /></div>
                                                             <p className={`text-6xl font-black ${cat.v >= 7.5 ? 'text-green-600' : cat.v >= 5 ? 'text-yellow-600' : 'text-red-600'}`}>{cat.v}</p>
                                                         </div>
-                                                        <h5 className="font-black text-slate-800 uppercase text-[10px] tracking-[0.3em] mb-6">{cat.n}</h5>
-                                                        <p className="text-sm font-medium text-slate-500 leading-relaxed mb-8">{cat.d}</p>
+                                                        <h5 className="font-black text-slate-800 uppercase text-[11px] tracking-[0.4em] mb-6">{cat.n}</h5>
+                                                        <p className="text-sm md:text-base font-medium text-slate-500 leading-relaxed mb-8">{cat.d}</p>
                                                     </div>
-                                                    <div className="w-full bg-white h-2 rounded-full overflow-hidden shadow-inner ring-1 ring-slate-100">
+                                                    <div className="w-full bg-white h-2.5 rounded-full overflow-hidden shadow-inner ring-1 ring-slate-100">
                                                         <div className={`h-full transition-all duration-1000 ${cat.v >= 7.5 ? 'bg-green-600' : cat.v >= 5 ? 'bg-yellow-400' : 'bg-red-500'}`} style={{ width: `${cat.v * 10}%` }}></div>
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
 
-                                        <div className="bg-ufv-gradient p-12 md:p-20 rounded-[5rem] text-white shadow-2xl relative overflow-hidden group text-left">
-                                            <Icon name="microscope" size={500} className="absolute -bottom-20 -right-20 opacity-5 group-hover:opacity-10 transition-opacity" />
-                                            <div className="flex flex-col md:flex-row items-center gap-16 relative z-10">
-                                                <div className="bg-yellow-400 text-slate-900 p-12 rounded-[4rem] shadow-2xl transform -rotate-3"><Icon name="target" size={80} /></div>
-                                                <div className="flex-1">
-                                                    <span className="text-[11px] font-black uppercase tracking-[0.5em] text-yellow-400 mb-8 inline-block font-black">Proposta Estratégica NEPLAN</span>
-                                                    <h4 className="text-5xl font-black leading-[0.95] tracking-tighter mb-12">{selectedMun.actionPlan}</h4>
+                                        <div className="bg-ufv-gradient p-12 md:p-24 rounded-[5rem] text-white shadow-2xl relative overflow-hidden group text-left">
+                                            <Icon name="microscope" size={600} className="absolute -bottom-32 -right-32 opacity-5 transition-opacity" />
+                                            <div className="flex flex-col items-start gap-16 relative z-10">
+                                                <div className="bg-yellow-400 text-slate-900 p-10 rounded-[3.5rem] shadow-2xl transform -rotate-3"><Icon name="target" size={80} /></div>
+                                                <div className="flex-1 w-full">
+                                                    <span className="text-[11px] font-black uppercase tracking-[0.6em] text-yellow-400 mb-8 inline-block">Plano Estratégico de Intervenção NEPLAN</span>
+                                                    <h4 className="text-5xl md:text-7xl font-black leading-none tracking-tighter mb-16">{selectedMun.actionPlan}</h4>
                                                     
-                                                    <div className="space-y-6">
+                                                    <div className="space-y-10">
                                                         {selectedMun.opportunities.map((opt, i) => (
-                                                            <div key={i} className="bg-white/10 p-8 rounded-[2.5rem] border border-white/10 flex items-center gap-8 group hover:bg-white/20 transition-all">
-                                                                <div className="bg-white/20 p-4 rounded-2xl shadow-xl"><Icon name="shield-check" size={28} className="text-yellow-400" /></div>
-                                                                <p className="text-2xl font-bold leading-tight text-white">{opt}</p>
+                                                            <div key={i} className="bg-white/10 p-10 rounded-[3rem] border border-white/10 flex items-center gap-10 group hover:bg-white/20 transition-all">
+                                                                <div className="bg-white/20 p-6 rounded-3xl shadow-xl shrink-0"><Icon name="shield-check" size={36} className="text-yellow-400" /></div>
+                                                                <p className="text-2xl md:text-3xl font-bold leading-tight text-white tracking-tight">{opt}</p>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -399,28 +377,28 @@
                         )}
                     </main>
 
-                    <footer className="max-w-7xl mx-auto py-24 border-t border-slate-100 px-10">
-                        <div className="flex flex-col md:flex-row justify-between items-center gap-16 text-left">
+                    <footer className="py-32 border-t border-slate-100 px-8 md:px-12 bg-white">
+                        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row justify-between items-center gap-20 text-left">
                             <div className="flex items-center gap-10">
-                                <p className="text-5xl font-black text-slate-900 tracking-[0.1em] uppercase leading-none">NEPLAN</p>
-                                <div className="h-14 w-px bg-slate-200"></div>
-                                <img src={UFV_LOGO_URL} alt="UFV" className="h-20 grayscale opacity-40 hover:opacity-100 transition-all" />
+                                <p className="text-6xl font-black text-slate-900 tracking-[0.1em] uppercase leading-none">NEPLAN</p>
+                                <div className="h-16 w-px bg-slate-200"></div>
+                                <img src={UFV_LOGO_URL} alt="UFV" className="h-24 grayscale opacity-40 hover:opacity-100 transition-all" />
                             </div>
                             
-                            <div className="text-center md:text-right">
-                                <p className="text-[11px] font-black text-slate-400 tracking-widest uppercase mb-4">Responsável Técnico</p>
-                                <p className="text-4xl font-light text-slate-800 tracking-tighter leading-none italic">
-                                    Professor Dr. Luiz Antônio <span className="text-[#004a23] italic font-black italic not-italic">Abrantes</span>
+                            <div className="text-center lg:text-right">
+                                <p className="text-[11px] font-black text-slate-400 tracking-widest uppercase mb-6">Pesquisador Responsável</p>
+                                <p className="text-5xl md:text-6xl font-light text-slate-800 tracking-tighter leading-none italic">
+                                    Professor Dr. Luiz Antônio <span className="text-[#004a23] italic font-black not-italic">Abrantes</span>
                                 </p>
-                                <p className="text-sm font-bold text-slate-400 mt-4 leading-none tracking-widest lowercase">
-                                    <span className="text-[#004a23]">abrantes</span>@ufv.br
+                                <p className="text-xl font-bold text-slate-400 mt-6 leading-none tracking-widest lowercase">
+                                    <span className="text-[#004a23] font-bold">abrantes</span>@ufv.br
                                 </p>
                             </div>
                         </div>
-                        <div className="mt-24 text-center flex flex-col items-center gap-8">
-                            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">Diagnóstico Fazendário Estratégico • 2026</p>
-                            <div className="flex items-center gap-5 text-[14px] font-bold text-slate-500 bg-white px-10 py-5 rounded-full border border-slate-100 shadow-xl">
-                                <Icon name="shield-check" className="text-green-700" size={28} /> Soluções Tributárias para o Setor Público Mineiro
+                        <div className="mt-28 text-center flex flex-col items-center gap-10 border-t border-slate-50 pt-20 opacity-80">
+                            <p className="text-[10px] font-black uppercase tracking-[0.8em] text-slate-300">Diagnóstico Fazendário Estratégico • 2026</p>
+                            <div className="flex items-center gap-6 text-[16px] font-bold text-slate-500 bg-slate-50 px-12 py-5 rounded-full border border-slate-100 shadow-sm">
+                                <Icon name="shield-check" className="text-green-700" size={32} /> Soluções Tributárias para o Setor Público Mineiro
                             </div>
                         </div>
                     </footer>
